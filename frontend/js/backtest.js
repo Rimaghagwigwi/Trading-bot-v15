@@ -183,6 +183,35 @@ class BacktestManager {
             });
     }
 
+    // Start mock backtest (for testing)
+    startMockBacktest() {
+        this.isRunning = true;
+        console.log('✅ Starting mock backtest...');
+        
+        const config = this.getBacktestConfig();
+        if (!config.symbols || !config.timeframe || !config.strategy) {
+            console.error('❌ Missing backtest configuration.');
+            this.isRunning = false;
+            return;
+        }
+        
+        console.log('🔧 Mock backtest configuration:', config);
+        
+        // Call mock endpoint
+        window.API.client.post('/api/mock-backtest', config)
+            .then(response => {
+                this.backtestHistory.push(response);
+                this.displayResults(response);
+                this.isRunning = false;
+                window.Utils.showSuccess('Mock backtest completed successfully!');
+            })
+            .catch(error => {
+                console.error('❌ Error during mock backtest:', error);
+                window.Utils.showError('Mock backtest failed: ' + error.message);
+                this.isRunning = false;
+            });
+    }
+
     /**
      * Display backtest results in the interface
      * @param {Object} data - API response data
@@ -424,4 +453,15 @@ document.getElementById('run-backtest').addEventListener('click', async () => {
 
     // Start backtest
     window.BacktestManager.startBacktest();
+});
+
+// Listener for mock backtest button
+document.getElementById('run-mock-backtest').addEventListener('click', async () => {
+    if (window.BacktestManager.isRunning) { 
+        alert('A backtest is already running.');
+        return;
+    }   
+
+    // Start mock backtest
+    window.BacktestManager.startMockBacktest();
 });

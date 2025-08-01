@@ -337,6 +337,87 @@ def create_app():
         
         return jsonify({'strategies': config.get('strategies', [])})
     
+    @app.route('/api/mock-backtest', methods=['POST'])
+    def run_mock_backtest():
+        """Runs a mock backtest with sample data for testing when external APIs are unavailable"""
+        try:
+            request_json = request.get_json()
+            
+            if not request_json:
+                return jsonify({'error': 'JSON data required'}), 400
+            
+            logger.info(f"Mock backtest parameters: {request_json}")
+            
+            # Generate mock results
+            mock_results = {
+                'backtest_id': f"mock_{int(datetime.now().timestamp())}",
+                'parameters': request_json,
+                'results': {
+                    'graph_data': {
+                        'timestamp': ['2024-07-01 00:00:00', '2024-07-15 00:00:00', '2024-08-01 00:00:00'],
+                        'total_value': [10000, 10500, 11200],
+                        'benchmark': [10000, 10300, 10800]
+                    },
+                    'trades_history': [
+                        {
+                            'symbol': request_json.get('symbols', ['BTCUSDC'])[0],
+                            'type': 'buy',
+                            'timestamp': '2024-07-01 00:00:00',
+                            'price': 60000,
+                            'quantity': 0.1667
+                        },
+                        {
+                            'symbol': request_json.get('symbols', ['BTCUSDC'])[0],
+                            'type': 'sell', 
+                            'timestamp': '2024-08-01 00:00:00',
+                            'price': 67200,
+                            'quantity': 0.1667
+                        }
+                    ]
+                },
+                'metrics': {
+                    'return_metrics': {
+                        'total_return_pct': 12.0,
+                        'cagr_pct': 144.0
+                    },
+                    'benchmark_metrics': {
+                        'benchmark_return_pct': 8.0,
+                        'excess_return_pct': 4.0
+                    },
+                    'risk_metrics': {
+                        'sharpe_ratio': 1.5,
+                        'sortino_ratio': 2.1,
+                        'volatility_pct': 15.2
+                    },
+                    'drawdown_metrics': {
+                        'max_drawdown_pct': -5.2
+                    },
+                    'trade_metrics': {
+                        'total_trades': 2,
+                        'win_rate_pct': 100.0
+                    }
+                },
+                'market_data': {
+                    request_json.get('symbols', ['BTCUSDC'])[0]: {
+                        'timestamps': ['2024-07-01 00:00:00', '2024-07-15 00:00:00', '2024-08-01 00:00:00'],
+                        'open': [60000, 62000, 66000],
+                        'high': [61000, 64000, 68000],
+                        'low': [59000, 61000, 65000],
+                        'close': [60500, 63000, 67200],
+                        'volume': [1000, 1200, 1100]
+                    }
+                }
+            }
+            
+            return jsonify({
+                'success': True,
+                **mock_results
+            })
+            
+        except Exception as e:
+            logger.error(f"Error in mock backtest: {str(e)}")
+            return jsonify({'error': f'Mock backtest error: {str(e)}'}), 500
+    
     @app.errorhandler(404)
     def not_found(error):
         """404 error handler"""

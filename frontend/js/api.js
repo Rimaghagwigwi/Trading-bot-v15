@@ -216,8 +216,8 @@ class ApiClient {
      * Wrapper for API calls with error handling
      */
     async safeApiCall(apiMethod, context = '', showLoading = true) {
+        let notifID = null;
         try {
-            let notifID = null;
             if (showLoading && window.Utils && window.Utils.showLoading) {
                 notifID = window.Utils.showLoading(`${context}...`);
             }
