@@ -4,7 +4,7 @@
  */
 
 class ApiClient {
-    constructor(baseUrl = 'http://192.168.1.77:5000') {
+    constructor(baseUrl = window.location.origin) {
         this.baseUrl = baseUrl;
         this.defaultHeaders = {
             'Content-Type': 'application/json',
@@ -102,19 +102,16 @@ class ApiClient {
      * Gets historical market data
      */
     async getMarketData(symbol, timeframe, startDate, endDate) {
-        // Parameter validation
-        if (!Utils.validateCryptoSymbol(symbol)) {
-            throw new Error('Invalid crypto symbol');
+        // Basic parameter validation
+        if (!symbol) {
+            throw new Error('Symbol is required');
         }
-        if (!Utils.validateTimeframe(timeframe)) {
-            throw new Error('Invalid timeframe');
-        }
-        if (!Utils.validateDateRange(startDate, endDate)) {
-            throw new Error('Invalid date range');
+        if (!timeframe) {
+            throw new Error('Timeframe is required');
         }
 
         const params = {
-            symbol: Utils.normalizeSymbol(symbol),
+            symbol: window.Utils ? window.Utils.normalizeSymbol(symbol) : symbol.toUpperCase(),
             timeframe,
             start_date: startDate,
             end_date: endDate
@@ -132,7 +129,10 @@ class ApiClient {
             throw new Error('Invalid backtest configuration');
         }
 
-        config.symbols = config.symbols.map(Utils.normalizeSymbol);
+        // Normalize symbols if Utils is available
+        if (window.Utils && window.Utils.normalizeSymbol) {
+            config.symbols = config.symbols.map(window.Utils.normalizeSymbol);
+        }
 
         return this.post('/api/backtest', config);
     }
@@ -202,15 +202,31 @@ class ApiClient {
     }
 
     /**
+     * Validates backtest configuration
+     */
+    validateBacktestConfig(config) {
+        if (!config) return false;
+        if (!config.symbols || !Array.isArray(config.symbols) || config.symbols.length === 0) return false;
+        if (!config.strategy) return false;
+        if (!config.timeframe) return false;
+        return true;
+    }
+
+    /**
      * Wrapper for API calls with error handling
      */
     async safeApiCall(apiMethod, context = '', showLoading = true) {
+        let notifID = null;
         try {
-            const notifID = Utils.showLoading();
+            if (showLoading && window.Utils && window.Utils.showLoading) {
+                notifID = window.Utils.showLoading(`${context}...`);
+            }
 
             const result = await apiMethod();
 
-            Utils.hideNotification(notifID);
+            if (notifID && window.Utils && window.Utils.hideNotification) {
+                window.Utils.hideNotification(notifID);
+            }
             
             return {
                 success: true,
@@ -218,9 +234,11 @@ class ApiClient {
                 timestamp: new Date().toISOString()
             };
         } catch (error) {
-            if (Utils.hideLoading) {
-                Utils.hideNotification(notifID);
-                Utils.showError(`Error during ${context}: ${error.message}`);
+            if (notifID && window.Utils && window.Utils.hideNotification) {
+                window.Utils.hideNotification(notifID);
+            }
+            if (window.Utils && window.Utils.showError) {
+                window.Utils.showError(`Error during ${context}: ${error.message}`);
             }
             
             return this.handleApiError(error, context);

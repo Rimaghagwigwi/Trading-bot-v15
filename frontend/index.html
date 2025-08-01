@@ -34,7 +34,87 @@
             <!-- Onglet Live Trading -->
             <div id="live-trading" class="tab-content">
                 <h1 class="section-title">Live Trading</h1>
-                <p>Interface de trading en temps réel - À implémenter</p>
+                
+                <div class="trading-status-section">
+                    <div class="status-card">
+                        <h3>Trading Status</h3>
+                        <div class="status-indicator stopped">
+                            <span class="status-dot"></span>
+                            <span class="status-text">Stopped</span>
+                        </div>
+                        <p class="status-description">Live trading is currently not implemented. This is a placeholder interface for future development.</p>
+                    </div>
+                </div>
+
+                <div class="live-trading-config">
+                    <div class="config-panel">
+                        <h3>Trading Configuration</h3>
+                        <div class="form-group">
+                            <label>Trading Pair</label>
+                            <select disabled>
+                                <option>BTCUSDT</option>
+                                <option>ETHUSDT</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Strategy</label>
+                            <select disabled>
+                                <option>RSI Strategy</option>
+                                <option>Buy & Hold</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Initial Capital</label>
+                            <input type="number" value="10000" disabled>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-success" disabled>Start Live Trading</button>
+                            <button class="btn btn-danger" disabled>Stop Trading</button>
+                        </div>
+                    </div>
+
+                    <div class="config-panel">
+                        <h3>Portfolio Overview</h3>
+                        <div class="portfolio-item">
+                            <span>Total Balance:</span>
+                            <span>$10,000.00</span>
+                        </div>
+                        <div class="portfolio-item">
+                            <span>Available:</span>
+                            <span>$10,000.00</span>
+                        </div>
+                        <div class="portfolio-item">
+                            <span>In Positions:</span>
+                            <span>$0.00</span>
+                        </div>
+                        <div class="portfolio-item">
+                            <span>Today's P&L:</span>
+                            <span class="positive">+$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="live-features-info">
+                    <h3>Planned Live Trading Features</h3>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <h4>🔄 Real-time Trading</h4>
+                            <p>Automated strategy execution on live markets</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>📊 Live Monitoring</h4>
+                            <p>Real-time portfolio tracking and performance metrics</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>⚠️ Risk Management</h4>
+                            <p>Stop-loss, take-profit, and position sizing controls</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>📈 Live Charts</h4>
+                            <p>Real-time price charts with trading signals</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Onglet Backtest -->
@@ -120,66 +200,23 @@
 
                     <div class="form-group">
                         <button type="button" class="btn btn-success" id="run-backtest">Lancer le Backtest</button>
+                        <button type="button" class="btn btn-secondary" id="run-mock-backtest">Test avec données simulées</button>
                     </div>
                 </div>
 
                 <!-- Métriques des résultats -->
-                <div class="metrics-section">
+                <div id="backtest-results" class="metrics-section">
                     <h2>Métriques de Performance</h2>
-                    <div class="metrics-grid">
-                        <div class="metric-card">
-                            <div class="metric-title">Rendement Total</div>
-                            <div class="metric-value">--</div>
-                            <div class="metric-change">--%</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-title">Sharpe Ratio</div>
-                            <div class="metric-value">--</div>
-                            <div class="metric-change">--</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-title">Max Drawdown</div>
-                            <div class="metric-value">--</div>
-                            <div class="metric-change negative">--%</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-title">Nombre de Trades</div>
-                            <div class="metric-value">--</div>
-                            <div class="metric-change">--</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-title">Win Rate</div>
-                            <div class="metric-value">--</div>
-                            <div class="metric-change positive">--%</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-title">Profit Factor</div>
-                            <div class="metric-value">--</div>
-                            <div class="metric-change">--</div>
-                        </div>
+                    <div id="metrics-cards-grid">
+                        <!-- Metrics will be populated here by JavaScript -->
                     </div>
                 </div>
 
                 <!-- Graphiques -->
-                <div class="charts-section">
+                <div id="backtest-charts" class="charts-section">
                     <h2>Graphiques d'Analyse</h2>
-                    <div class="charts-grid">
-                        <div class="chart-container">
-                            <h3 class="chart-title">Évolution du Portfolio</h3>
-                            <div class="chart-placeholder">Graphique sera intégré ici</div>
-                        </div>
-                        <div class="chart-container">
-                            <h3 class="chart-title">Drawdown</h3>
-                            <div class="chart-placeholder">Graphique sera intégré ici</div>
-                        </div>
-                        <div class="chart-container">
-                            <h3 class="chart-title">Distribution des Trades</h3>
-                            <div class="chart-placeholder">Graphique sera intégré ici</div>
-                        </div>
-                        <div class="chart-container">
-                            <h3 class="chart-title">Performance par Paire</h3>
-                            <div class="chart-placeholder">Graphique sera intégré ici</div>
-                        </div>
+                    <div id="backtest-charts-container">
+                        <!-- Charts will be populated here by JavaScript -->
                     </div>
                 </div>
             </div>

@@ -109,7 +109,7 @@ class BacktestManager {
 
     // Get backtest configuration
     getBacktestConfig() {
-        const symbols = Array.from(document.querySelectorAll('input[name="trading-pairs"]:checked')).map(input => input.value);
+        const symbols = Array.from(document.querySelectorAll('input[name="trading-pair"]:checked')).map(input => input.value);
         const timeframe = document.getElementById('timeframe').value;
         const strategy_name = document.getElementById('strategy').value;
         const strategy_params = this.getStrategyParams(strategy_name);
@@ -179,6 +179,35 @@ class BacktestManager {
             })
             .catch(error => {
                 console.error('❌ Error during backtest:', error);
+                this.isRunning = false;
+            });
+    }
+
+    // Start mock backtest (for testing)
+    startMockBacktest() {
+        this.isRunning = true;
+        console.log('✅ Starting mock backtest...');
+        
+        const config = this.getBacktestConfig();
+        if (!config.symbols || !config.timeframe || !config.strategy) {
+            console.error('❌ Missing backtest configuration.');
+            this.isRunning = false;
+            return;
+        }
+        
+        console.log('🔧 Mock backtest configuration:', config);
+        
+        // Call mock endpoint
+        window.API.client.post('/api/mock-backtest', config)
+            .then(response => {
+                this.backtestHistory.push(response);
+                this.displayResults(response);
+                this.isRunning = false;
+                window.Utils.showSuccess('Mock backtest completed successfully!');
+            })
+            .catch(error => {
+                console.error('❌ Error during mock backtest:', error);
+                window.Utils.showError('Mock backtest failed: ' + error.message);
                 this.isRunning = false;
             });
     }
@@ -424,4 +453,15 @@ document.getElementById('run-backtest').addEventListener('click', async () => {
 
     // Start backtest
     window.BacktestManager.startBacktest();
+});
+
+// Listener for mock backtest button
+document.getElementById('run-mock-backtest').addEventListener('click', async () => {
+    if (window.BacktestManager.isRunning) { 
+        alert('A backtest is already running.');
+        return;
+    }   
+
+    // Start mock backtest
+    window.BacktestManager.startMockBacktest();
 });
