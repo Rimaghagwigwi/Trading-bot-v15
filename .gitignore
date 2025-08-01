@@ -1,5 +1,7 @@
-# Fichier avec les clés
+# Environment and secrets
 .env
+.env.local
+.env.*.local
 
 # Python
 __pycache__/
@@ -12,20 +14,72 @@ venv/
 .venv/
 pip-log.txt
 pip-delete-this-directory.txt
-test.py
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
 
-# Données et logs
+# Data files
 *.log
 *.csv
 data/historical/*.csv
+backend/data/historical/*.csv
 *.db
 *.sqlite
+*.sqlite3
 
-# Fichiers système
+# Testing
+test.py
+tests/.pytest_cache/
+.coverage
+coverage.xml
+*.cover
+.hypothesis/
+
+# IDEs and editors
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
-# Node.js
+# Node.js (if using any JS tools)
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Operating system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Documentation builds
+docs/_build/
+site/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# Backup files
+*.bak
+*.backup
+*.old
