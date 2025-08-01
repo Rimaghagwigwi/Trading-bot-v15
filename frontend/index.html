@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot de Trading - Interface</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <h1>Trading Bot</h1>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="live-trading">Live Trading</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-tab="backtest">Backtest</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link" onclick="toggleDropdown(this)">Info ▼</a>
+                    <div class="dropdown-content">
+                        <a href="#" class="dropdown-item" data-tab="documentation">Documentation</a>
+                        <a href="#" class="dropdown-item" data-tab="api-reference">API Reference</a>
+                        <a href="#" class="dropdown-item" data-tab="changelog">Changelog</a>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <!-- Onglet Live Trading -->
+            <div id="live-trading" class="tab-content">
+                <h1 class="section-title">Live Trading</h1>
+                <p>Interface de trading en temps réel - À implémenter</p>
+            </div>
+
+            <!-- Onglet Backtest -->
+            <div id="backtest-container" class="tab-content active">
+                <h1 class="section-title">Backtest</h1>
+                
+                <!-- Sélection des paires de trading -->
+                <div class="trading-pairs-section">
+                    <h2>Sélection des Paires de Trading</h2>
+                    <div class="trading-pairs-grid" id="backtest-pairs">
+                        <!-- Les paires de trading seront insérées ici dynamiquement -->
+                    </div>
+                </div>
+
+                <!-- Configuration de la stratégie -->
+                <div class="strategy-config">
+                    <!-- Paramètres généraux -->
+                    <div class="config-panel">
+                        <h3>General Parameters</h3>
+                        <div class="form-group">
+                            <label for="start-date">Date de début</label>
+                            <input type="date" id="start-date" name="start-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="end-date">Date de fin</label>
+                            <input type="date" id="end-date" name="end-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="initial-capital">Capital initial</label>
+                            <input type="number" id="initial-capital" name="initial-capital" placeholder="10000" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="timeframe">Timeframe</label>
+                            <select id="timeframe" name="timeframe">
+                                <!-- Options de timeframe -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="commission">Commission (%)</label>
+                            <input type="number" id="commission" name="commission" placeholder="0.1" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="strategy">Type de stratégie</label>
+                            <select id="strategy" name="strategy">
+                                <!-- Options de stratégie -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Paramètres de stratégie -->
+                    <div class="config-panel" id="strategy-parameters">
+                        <h3>Strategy Parameters</h3>
+                        <div class="form-group">
+                            <label for="sma-short">SMA Court</label>
+                            <input type="number" id="sma-short" name="sma-short" placeholder="20" min="1">
+                        </div>
+                    </div>
+
+                    <!-- Paramètres de risque -->
+                    <div class="config-panel" id="risk-parameters">
+                        <h3>Risk Parameters</h3>
+                        <div class="form-group">
+                            <label for="position-size">Taille de position (%)</label>
+                            <input type="number" id="position-size" name="position-size" placeholder="10" step="0.1" min="0" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="stop-loss">Stop Loss (%)</label>
+                            <input type="number" id="stop-loss" name="stop-loss" placeholder="2" step="0.1" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="take-profit">Take Profit (%)</label>
+                            <input type="number" id="take-profit" name="take-profit" placeholder="4" step="0.1" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="max-positions">Max positions simultanées</label>
+                            <input type="number" id="max-positions" name="max-positions" placeholder="5" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="risk-reward">Risk/Reward Ratio</label>
+                            <input type="number" id="risk-reward" name="risk-reward" placeholder="2" step="0.1" min="0">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="button" class="btn btn-success" id="run-backtest">Lancer le Backtest</button>
+                    </div>
+                </div>
+
+                <!-- Métriques des résultats -->
+                <div class="metrics-section">
+                    <h2>Métriques de Performance</h2>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-title">Rendement Total</div>
+                            <div class="metric-value">--</div>
+                            <div class="metric-change">--%</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-title">Sharpe Ratio</div>
+                            <div class="metric-value">--</div>
+                            <div class="metric-change">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-title">Max Drawdown</div>
+                            <div class="metric-value">--</div>
+                            <div class="metric-change negative">--%</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-title">Nombre de Trades</div>
+                            <div class="metric-value">--</div>
+                            <div class="metric-change">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-title">Win Rate</div>
+                            <div class="metric-value">--</div>
+                            <div class="metric-change positive">--%</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-title">Profit Factor</div>
+                            <div class="metric-value">--</div>
+                            <div class="metric-change">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphiques -->
+                <div class="charts-section">
+                    <h2>Graphiques d'Analyse</h2>
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h3 class="chart-title">Évolution du Portfolio</h3>
+                            <div class="chart-placeholder">Graphique sera intégré ici</div>
+                        </div>
+                        <div class="chart-container">
+                            <h3 class="chart-title">Drawdown</h3>
+                            <div class="chart-placeholder">Graphique sera intégré ici</div>
+                        </div>
+                        <div class="chart-container">
+                            <h3 class="chart-title">Distribution des Trades</h3>
+                            <div class="chart-placeholder">Graphique sera intégré ici</div>
+                        </div>
+                        <div class="chart-container">
+                            <h3 class="chart-title">Performance par Paire</h3>
+                            <div class="chart-placeholder">Graphique sera intégré ici</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglets Info -->
+            <div id="documentation" class="tab-content">
+                <h1 class="section-title">Documentation</h1>
+                <p>Documentation du bot de trading - À implémenter</p>
+            </div>
+
+            <div id="api-reference" class="tab-content">
+                <h1 class="section-title">API Reference</h1>
+                <p>Référence de l'API - À implémenter</p>
+            </div>
+
+            <div id="changelog" class="tab-content">
+                <h1 class="section-title">Changelog</h1>
+                <p>Journal des modifications - À implémenter</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/charts.js"></script>
+
+    <script src="js/trading.js"></script>
+    <script src="js/backtest.js"></script>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
