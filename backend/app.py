@@ -283,16 +283,59 @@ def create_app():
             config = json.load(f)
         
         strategies = config.get('strategies', [])
+        
+        # Add strategy parameters by importing strategy classes
+        strategy_classes = {
+            'BuyAndHoldStrategy': BuyAndHoldStrategy,
+            'RSIStrategy': RSIStrategy,
+            'DCA_strategy': DCA_strategy,
+            'EMACrossoverRSIVolumeStrategy': EMACrossoverRSIVolumeStrategy
+        }
+        
         for strategy in strategies:
-            # Add parameters and risk parameters if they exist
-            strategy['parameters'] = getattr(globals()[strategy['class']], 'parameters', [])
-            strategy['risk_parameters'] = getattr(globals()[strategy['class']], 'risk_parameters', [])
+            strategy_class = strategy_classes.get(strategy['class'])
+            if strategy_class:
+                # Convert parameter format from list to dict for frontend
+                parameters = {}
+                if hasattr(strategy_class, 'parameters'):
+                    for param in strategy_class.parameters:
+                        parameters[param['name']] = {
+                            'display_name': param['display_name'],
+                            'default': param['default']
+                        }
+                
+                risk_parameters = {}
+                if hasattr(strategy_class, 'risk_parameters'):
+                    for param in strategy_class.risk_parameters:
+                        risk_parameters[param['name']] = {
+                            'display_name': param['display_name'], 
+                            'default': param['default']
+                        }
+                
+                strategy['parameters'] = parameters
+                strategy['risk_parameters'] = risk_parameters
+            else:
+                strategy['parameters'] = {}
+                strategy['risk_parameters'] = {}
             
         return jsonify({
             'symbols': config.get('trading_pairs', []),
             'timeframes': config.get('timeframes', []),
             'strategies': strategies,
         })
+    
+    @app.route('/api/strategies')
+    def get_strategies():
+        """Returns the list of available strategies"""
+        config_path = os.path.join(os.path.dirname(__file__), 'config.json')
+        
+        if not os.path.exists(config_path):
+            return jsonify({'strategies': []})
+        
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+        
+        return jsonify({'strategies': config.get('strategies', [])})
     
     @app.errorhandler(404)
     def not_found(error):

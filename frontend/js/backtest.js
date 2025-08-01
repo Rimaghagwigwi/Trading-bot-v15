@@ -109,7 +109,7 @@ class BacktestManager {
 
     // Get backtest configuration
     getBacktestConfig() {
-        const symbols = Array.from(document.querySelectorAll('input[name="trading-pairs"]:checked')).map(input => input.value);
+        const symbols = Array.from(document.querySelectorAll('input[name="trading-pair"]:checked')).map(input => input.value);
         const timeframe = document.getElementById('timeframe').value;
         const strategy_name = document.getElementById('strategy').value;
         const strategy_params = this.getStrategyParams(strategy_name);
