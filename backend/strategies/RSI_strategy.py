@@ -3,8 +3,11 @@ RSI (Relative Strength Index) Strategy
 """
 
 import pandas as pd
-import talib
+import numpy as np
 import logging
+
+# Import technical indicators from our helpers
+from backend.utils.helpers import calculate_rsi
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -50,9 +53,8 @@ class RSIStrategy():
         signal_df = market_data.copy()
         signal_df['signal'] = None
         
-        # Calculate RSI
-        rsi = talib.RSI(signal_df['close'].values, timeperiod=self.params['rsi_period'])
-        signal_df['rsi'] = rsi
+        # Calculate RSI using our helper function
+        signal_df['rsi'] = calculate_rsi(signal_df['close'], period=self.params['rsi_period'])
         
         # Generate signals
         for i in range(1, len(signal_df)):

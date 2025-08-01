@@ -5,9 +5,11 @@ on 30m, 1h, 4h timeframes
 """
 
 import pandas as pd
-import talib
 import numpy as np
 import logging
+
+# Import technical indicators from our helpers
+from backend.utils.helpers import calculate_rsi, calculate_ema, calculate_sma, calculate_atr, calculate_macd
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -72,27 +74,22 @@ class EMACrossoverRSIVolumeStrategy():
 
         # Indicator calculations
         # EMAs
-        ema_fast = talib.EMA(signal_df['close'].values, timeperiod=self.params['ema_fast'])
-        ema_slow = talib.EMA(signal_df['close'].values, timeperiod=self.params['ema_slow'])
-        signal_df['ema_fast'] = ema_fast
-        signal_df['ema_slow'] = ema_slow
+        signal_df['ema_fast'] = calculate_ema(signal_df['close'], self.params['ema_fast'])
+        signal_df['ema_slow'] = calculate_ema(signal_df['close'], self.params['ema_slow'])
 
         # RSI
-        rsi = talib.RSI(signal_df['close'].values, timeperiod=self.params['rsi_period'])
-        signal_df['rsi'] = rsi
+        signal_df['rsi'] = calculate_rsi(signal_df['close'], self.params['rsi_period'])
 
         # ATR for dynamic stop loss and take profit
-        atr = talib.ATR(signal_df['high'].values, signal_df['low'].values,
-                       signal_df['close'].values, timeperiod=self.params['atr_period'])
-        signal_df['atr'] = atr
+        signal_df['atr'] = calculate_atr(signal_df['high'], signal_df['low'], 
+                                        signal_df['close'], self.params['atr_period'])
 
         # Average volume
-        volume_sma = talib.SMA(signal_df['volume'].values, timeperiod=self.params['volume_period'])
-        signal_df['volume_sma'] = volume_sma
+        signal_df['volume_sma'] = calculate_sma(signal_df['volume'], self.params['volume_period'])
         signal_df['volume_ratio'] = signal_df['volume'] / signal_df['volume_sma']
 
         # MACD for trend confirmation
-        macd, macd_signal, macd_hist = talib.MACD(signal_df['close'].values)
+        macd, macd_signal, macd_hist = calculate_macd(signal_df['close'])
         signal_df['macd'] = macd
         signal_df['macd_signal'] = macd_signal
         signal_df['macd_hist'] = macd_hist

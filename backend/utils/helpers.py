@@ -267,3 +267,114 @@ def calculate_compound_return(returns: List[float]) -> float:
         compound *= (1 + ret / 100)
     
     return (compound - 1) * 100
+
+# Technical Indicators (Simple implementations without TA-Lib)
+def calculate_rsi(prices: pd.Series, period: int = 14) -> pd.Series:
+    """
+    Calculate RSI (Relative Strength Index) without TA-Lib
+    
+    Args:
+        prices: Series of price data
+        period: RSI period (default 14)
+    
+    Returns:
+        Series with RSI values
+    """
+    if len(prices) < period + 1:
+        return pd.Series([np.nan] * len(prices), index=prices.index)
+    
+    delta = prices.diff()
+    gain = delta.where(delta > 0, 0)
+    loss = -delta.where(delta < 0, 0)
+    
+    avg_gain = gain.rolling(window=period).mean()
+    avg_loss = loss.rolling(window=period).mean()
+    
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100 / (1 + rs))
+    
+    return rsi
+
+def calculate_ema(prices: pd.Series, period: int) -> pd.Series:
+    """
+    Calculate Exponential Moving Average without TA-Lib
+    
+    Args:
+        prices: Series of price data
+        period: EMA period
+    
+    Returns:
+        Series with EMA values
+    """
+    return prices.ewm(span=period, adjust=False).mean()
+
+def calculate_sma(prices: pd.Series, period: int) -> pd.Series:
+    """
+    Calculate Simple Moving Average
+    
+    Args:
+        prices: Series of price data
+        period: SMA period
+    
+    Returns:
+        Series with SMA values
+    """
+    return prices.rolling(window=period).mean()
+
+def calculate_volume_sma(volume: pd.Series, period: int) -> pd.Series:
+    """
+    Calculate Simple Moving Average for volume
+    
+    Args:
+        volume: Series of volume data
+        period: SMA period
+    
+    Returns:
+        Series with volume SMA values
+    """
+    return volume.rolling(window=period).mean()
+
+def calculate_atr(high: pd.Series, low: pd.Series, close: pd.Series, period: int = 14) -> pd.Series:
+    """
+    Calculate Average True Range (ATR) without TA-Lib
+    
+    Args:
+        high: Series of high prices
+        low: Series of low prices  
+        close: Series of close prices
+        period: ATR period (default 14)
+    
+    Returns:
+        Series with ATR values
+    """
+    prev_close = close.shift(1)
+    
+    tr1 = high - low
+    tr2 = abs(high - prev_close)
+    tr3 = abs(low - prev_close)
+    
+    tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+    
+    return tr.rolling(window=period).mean()
+
+def calculate_macd(prices: pd.Series, fast_period: int = 12, slow_period: int = 26, signal_period: int = 9) -> tuple:
+    """
+    Calculate MACD (Moving Average Convergence Divergence) without TA-Lib
+    
+    Args:
+        prices: Series of price data
+        fast_period: Fast EMA period (default 12)
+        slow_period: Slow EMA period (default 26)
+        signal_period: Signal line EMA period (default 9)
+    
+    Returns:
+        Tuple of (macd_line, signal_line, histogram)
+    """
+    ema_fast = calculate_ema(prices, fast_period)
+    ema_slow = calculate_ema(prices, slow_period)
+    
+    macd_line = ema_fast - ema_slow
+    signal_line = calculate_ema(macd_line, signal_period)
+    histogram = macd_line - signal_line
+    
+    return macd_line, signal_line, histogram
