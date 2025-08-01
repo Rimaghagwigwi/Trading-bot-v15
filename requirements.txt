@@ -1,10 +1,22 @@
+# Core dependencies
 python-dotenv>=1.0.0
-
 flask==2.3.3
 flask-cors>=4.0.0
 requests>=2.31.0
 
+# Trading & Data
 python-binance==1.0.19
-TA-Lib>=0.4.25
 pandas>=2.1.1
-numpy==1.26.4
+numpy>=1.24.0
+
+# Technical Analysis (optional - can be skipped if installation fails)
+# TA-Lib>=0.4.25
+
+# Alternative technical analysis (if TA-Lib fails)
+# ta>=0.10.2
+
+# Development & Testing (optional)
+# pytest>=7.0.0
+# pytest-flask>=1.2.0
+# black>=23.0.0
+# flake8>=6.0.0
