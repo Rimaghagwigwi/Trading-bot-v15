@@ -4,25 +4,23 @@ Buy and Hold Strategy
 
 import pandas as pd
 import logging
+from .strategy import Strategy
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class BuyAndHoldStrategy():
+class BuyAndHoldStrategy(Strategy):
     """Buy and Hold Strategy - Buy at the beginning and hold until the end"""
-    
-    parameters = [
+
+    parameters = {}
+
+    risk_parameters = [
         {'name': 'portion_buy', 'display_name': 'Buy Portion', 'default': 0.5},  # Buy 50% of available portion
         {'name': 'portion_sell', 'display_name': 'Sell Portion', 'default': 1.0},  # Sell 100% of the position
     ]
 
     def __init__(self):
         self.name = 'buy_and_hold'
-    def set_params(self, params):
-        use_defaults = not all(k['name'] in params for k in self.parameters)
-        if use_defaults:
-            logger.info("Using default parameters for Buy and Hold strategy")
-        self.params = {p['name']: p['default'] for p in self.parameters} if use_defaults else params
 
     def generate_signals(self, market_data: pd.DataFrame) -> pd.DataFrame:
         signal_df = market_data.copy()
@@ -48,3 +46,22 @@ class BuyAndHoldStrategy():
         signals_only = signal_df[signal_df['signal'].notnull()]
 
         return signals_only
+    
+    def get_strategy_info(self):
+        """
+        Returns strategy information
+        
+        Returns:
+            Dictionary with strategy info
+        """
+        return {
+            'name': self.name,
+            'description': 'Buy and Hold Strategy - Buy at the beginning and hold until the end',
+            'recommended_timeframes': ['1d', '1w', '1M'],
+            'recommended_assets': ['BTC', 'ETH', 'XRP', 'DOGE', 'BNB'],
+            'key_features': [
+                'Simple and effective for long-term investors',
+                'No need to time the market',
+                'Reduces impact of volatility through regular purchases'
+            ]
+        }

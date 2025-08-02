@@ -46,6 +46,25 @@ def create_app():
     backtest_engine = BacktestEngine()
     live_engine = None  # Placeholder for live trading engine if needed
     
+    config_path = os.path.join(os.path.dirname(__file__), 'config.json')
+    if not os.path.exists(config_path):
+        logger.warning(f"Configuration file not found at {config_path}. Using default settings.")
+        # Default configuration can be set here if needed
+    else:
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+        app.config['SUPPORTED_SYMBOLS'] = config.get('trading_pairs', [])
+        app.config['SUPPORTED_TIMEFRAMES'] = config.get('timeframes', [])
+        app.config['DEFAULT_SETTINGS'] = config.get('default_parameters', {})
+
+        strategies = config.get('strategies', [])
+        for strategy in strategies:
+            # Add parameters and risk parameters if they exist
+            strategy['parameters'] = getattr(globals()[strategy['class']], 'parameters', [])
+            strategy['risk_parameters'] = getattr(globals()[strategy['class']], 'risk_parameters', [])
+        
+        app.config['SUPPORTED_STRATEGIES'] = strategies
+
     # Route to serve index.html
     @app.route("/")
     def serve_index():
@@ -167,7 +186,6 @@ def create_app():
             logger.info(f"🚀 Starting backtest: {strategy_name} on {symbols}")
 
             # Create backtest engine
-            backtest_engine = BacktestEngine()
             backtest_engine.set_parameters(
                 initial_capital=float(request_json.get('initial_capital', 10000)),
                 commission_rate=float(request_json.get('commission_rate', 0.001)),
@@ -256,86 +274,16 @@ def create_app():
     @app.route('/api/config/defaults')
     def get_default_config():
         """Returns default configuration for backtest"""
-        default_config = {
-            'symbols': ['BTCUSDC'],
-            'timeframe': '1h',
-            'days': 90,
-            'initial_capital': 10000,
-            'commission_rate': 0.001,
-            'strategy': 'buy_and_hold'
-        }
-        
-        return jsonify(default_config)
-    
-    @app.route('/api/config')
-    def get_config():
+        return jsonify(app.config['DEFAULT_SETTINGS'])
+
+    @app.route('/api/config/supported')
+    def get_supported_config():
         """Returns all lists of supported parameters"""
-        config_path = os.path.join(os.path.dirname(__file__), 'config.json')
-        
-        if not os.path.exists(config_path):
-            return jsonify({
-                'symbols': [],
-                'timeframes': [],
-                'strategies': []
-            })
-        
-        with open(config_path, 'r') as f:
-            config = json.load(f)
-        
-        strategies = config.get('strategies', [])
-        
-        # Add strategy parameters by importing strategy classes
-        strategy_classes = {
-            'BuyAndHoldStrategy': BuyAndHoldStrategy,
-            'RSIStrategy': RSIStrategy,
-            'DCA_strategy': DCA_strategy,
-            'EMACrossoverRSIVolumeStrategy': EMACrossoverRSIVolumeStrategy
-        }
-        
-        for strategy in strategies:
-            strategy_class = strategy_classes.get(strategy['class'])
-            if strategy_class:
-                # Convert parameter format from list to dict for frontend
-                parameters = {}
-                if hasattr(strategy_class, 'parameters'):
-                    for param in strategy_class.parameters:
-                        parameters[param['name']] = {
-                            'display_name': param['display_name'],
-                            'default': param['default']
-                        }
-                
-                risk_parameters = {}
-                if hasattr(strategy_class, 'risk_parameters'):
-                    for param in strategy_class.risk_parameters:
-                        risk_parameters[param['name']] = {
-                            'display_name': param['display_name'], 
-                            'default': param['default']
-                        }
-                
-                strategy['parameters'] = parameters
-                strategy['risk_parameters'] = risk_parameters
-            else:
-                strategy['parameters'] = {}
-                strategy['risk_parameters'] = {}
-            
         return jsonify({
-            'symbols': config.get('trading_pairs', []),
-            'timeframes': config.get('timeframes', []),
-            'strategies': strategies,
+            'symbols': app.config['SUPPORTED_SYMBOLS'],
+            'timeframes': app.config['SUPPORTED_TIMEFRAMES'],
+            'strategies': app.config['SUPPORTED_STRATEGIES']
         })
-    
-    @app.route('/api/strategies')
-    def get_strategies():
-        """Returns the list of available strategies"""
-        config_path = os.path.join(os.path.dirname(__file__), 'config.json')
-        
-        if not os.path.exists(config_path):
-            return jsonify({'strategies': []})
-        
-        with open(config_path, 'r') as f:
-            config = json.load(f)
-        
-        return jsonify({'strategies': config.get('strategies', [])})
     
     @app.route('/api/mock-backtest', methods=['POST'])
     def run_mock_backtest():

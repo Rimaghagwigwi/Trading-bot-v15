@@ -165,14 +165,14 @@ class ApiClient {
     /**
      * Gets all possible configurations
      */
-    async getConfig() {
-        return this.get('/api/config');
+    async getSupportedConfig() {
+        return this.get('/api/config/supported');
     }
 
     /**
      * Gets default configuration parameters
      */
-    async getDefaults() {
+    async getDefaultConfig() {
         return this.get('/api/config/defaults');
     }
 
@@ -287,8 +287,8 @@ window.API = {
     },
     
     config: {
-        getConfig: () => apiClient.safeApiCall(() => apiClient.getConfig(), 'Fetching configuration'),
-        getDefaults: () => apiClient.safeApiCall(() => apiClient.getDefaults(), 'Fetching default configuration')
+        getSupportedConfig: () => apiClient.safeApiCall(() => apiClient.getSupportedConfig(), 'Fetching supported configuration'),
+        getDefaultConfig: () => apiClient.safeApiCall(() => apiClient.getDefaultConfig(), 'Fetching default configuration')
     },
     
     // Utility methods

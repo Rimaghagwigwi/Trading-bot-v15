@@ -19,7 +19,7 @@ class BacktestManager {
         console.log('🚀 Initializing BacktestManager...');
         try {
             // Initialize API client
-            const response = await window.API.config.getConfig();
+            const response = await window.API.config.getSupportedConfig();
             console.log('Configuration fetched:', response.data);
             this.availableSymbols = response.data.symbols || [];
             this.availableTimeframes = response.data.timeframes || [];
@@ -28,15 +28,6 @@ class BacktestManager {
             console.error('❌ BacktestManager can\'t access configuration:', error);
             window.Utils.showError('❌ BacktestManager can\'t access configuration:');
             return;
-        }
-        
-        // Fetch default configuration
-        try {
-            const config = await window.API.config.getDefaults();
-            console.log('Default configuration fetched:', config);
-            this.applyDefaultConfig(config.data);
-        } catch (error) {
-            window.Utils.showError('❌ Unable to fetch default configuration');
         }
 
         console.log('✅ BacktestManager initialized successfully');
@@ -59,66 +50,31 @@ class BacktestManager {
         } catch (error) {
             window.Utils.showError('Unable to populate strategy select: ' + error.message);
         }
-
+        
+        // Fetch default configuration
         try {
-            const strategy_name = document.getElementById('backtest-container').querySelector('#strategy').value;
-            window.Utils.showInfo(`Selected strategy: ${strategy_name}`);
-            const strategy = this.strategies.find(s => s.name === strategy_name);
-            window.Utils.populateStrategyParams(strategy, 'backtest-container');
-            window.Utils.showInfo(`Strategy: ${strategy}`);
+            const config = await window.API.config.getDefaultConfig();
+            console.log('Default configuration fetched:', config.data);
+            window.Utils.applyDefaultConfig(this.strategies, config.data, 'backtest-container');
         } catch (error) {
-            window.Utils.showError('Unable to populate strategy parameters: ' + error.message);
-        }
-    }
-
-    
-    // Apply default configuration
-    applyDefaultConfig(config) {
-        if (!config) return;
-        const timeframeSelect = document.getElementById('timeframe');   
-        const strategySelect = document.getElementById('strategy');
-        const initialCapitalInput = document.getElementById('initial-capital');
-        const commissionInput = document.getElementById('commission');
-        const startDate = document.querySelector('#start-date');
-        const endDate = document.querySelector('#end-date');
-
-        if (timeframeSelect && config.timeframe) {
-            timeframeSelect.value = config.timeframe;
-        }
-        if (strategySelect && config.strategy) {
-            strategySelect.value = config.strategy;
-            this.populateStrategyParams(config.strategy);
-        }
-        if (initialCapitalInput && config.initial_capital) {
-            initialCapitalInput.value = config.initial_capital;
-        }
-        if (commissionInput && config.commission_rate) {
-            commissionInput.value = config.commission_rate * 100; // Convert to percentage
-        }
-        if (startDate && endDate && config.days) {
-            const start = new Date();
-            start.setDate(start.getDate() - config.days);
-            const end = new Date();
-            const startValue = start.toISOString().split('T')[0];
-            const endValue = end.toISOString().split('T')[0];
-            console.log(`Default dates applied: ${startValue} → ${endValue}`);
-            startDate.value = startValue;
-            endDate.value = endValue;
+            window.Utils.showError('Unable to fetch default configuration');
         }
     }
 
     // Get backtest configuration
     getBacktestConfig() {
-        const symbols = Array.from(document.querySelectorAll('input[name="trading-pair"]:checked')).map(input => input.value);
-        const timeframe = document.getElementById('timeframe').value;
-        const strategy_name = document.getElementById('strategy').value;
-        const strategy_params = this.getStrategyParams(strategy_name);
-        const initial_capital = document.getElementById('initial-capital').value || 10000;
-        const start_date = document.getElementById('start-date').value;
-        const end_date = document.getElementById('end-date').value;
-        const commission = parseFloat(document.getElementById('commission').value) || 0.1;
+        const container = document.getElementById('backtest-container');
+
+        const symbols = Array.from(container.querySelectorAll('input[name="trading-pair"]:checked')).map(input => input.value);
+        const timeframe = container.querySelector('#timeframe').value;
+        const strategy_name = container.querySelector('#strategy').value;
+        const initial_capital = container.querySelector('#initial-capital').value || 10000;
+        const start_date = container.querySelector('#start-date').value;
+        const end_date = container.querySelector('#end-date').value;
+        const commission = parseFloat(container.querySelector('#commission').value) || 0.1;
 
         const class_name = this.strategies.find(s => s.name === strategy_name)?.class;
+        const strategy_params = window.Utils.getStrategyParams(this.strategies, strategy_name, 'backtest-container');
 
         return {
             'symbols': symbols,
@@ -133,40 +89,20 @@ class BacktestManager {
         };
     }
 
-    getStrategyParams(strategy_name) {
-        const strategy = this.strategies.find(s => s.name === strategy_name);
-        console.log('Strategy found:', strategy);
-        if (!strategy || !strategy.parameters) {
-            console.warn('⚠️ No strategy or parameters found for:', strategy_name);
-            return {};
-        }
-        const params = {};
-        // Get parameter values
-        Object.entries(strategy.parameters).forEach(([key, param]) => {
-            const value = document.getElementById(key).value;
-            params[key] = parseFloat(value) || param.default; // Use default if input is invalid
-        });
-        // Get risk parameters
-        Object.entries(strategy.risk_parameters || {}).forEach(([key, param]) => {
-            const value = document.getElementById(key).value;
-            params[key] = parseFloat(value) || param.default; // Use default if input is invalid
-        });
-
-        return params;
-    }
-
     // Start backtest
     startBacktest() {
         this.isRunning = true;
         console.log('✅ Starting backtest...');
         // Logic to start backtest
         const config = this.getBacktestConfig();
-        if (!config.symbols || !config.timeframe || !config.strategy) {
-            console.error('❌ Missing backtest configuration.');
+        if (!config) {
+            console.error('Missing backtest configuration.');
             this.isRunning = false;
             return;
+        } else {
+            window.Utils.showSuccess('Starting backtest with configuration: ' + JSON.stringify(config));
         }
-        console.log('🔧 Backtest configuration:', config)
+        
         window.API.backtest.run(config)
             .then(response => {
                 if (!response.success) {

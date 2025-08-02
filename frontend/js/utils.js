@@ -188,12 +188,21 @@ class Utils {
             strategySelect.appendChild(option);
         });
 
-        this.setupStrategyChangeListener();
+        // Add new event listener
+        strategySelect.addEventListener('change', (event) => {
+            const strategy_name = event.target.value;
+            const selectedStrategy = strategies.find(s => s.name === strategy_name);
+            this.populateStrategyParams(selectedStrategy, containerId);
+        });
     }
 
     // Populate strategy parameter selects
     static populateStrategyParams(strategy, containerId) {
         const container = document.getElementById(containerId);
+        if (!strategy) {
+            window.Utils.showError('Invalid strategy');
+            return;
+        }
 
         const params = strategy ? strategy.parameters : null;
         const paramsContainer = container.querySelector('#strategy-parameters');
@@ -225,7 +234,9 @@ class Utils {
 
         if (risk_params && Object.keys(risk_params).length > 0) {
             riskParamsContainer.style.display = 'grid';
-            riskParamsContainer.innerHTML = ``;
+            riskParamsContainer.innerHTML = `
+                <h3>Risk Parameters</h3>
+            `;
 
             Object.entries(risk_params).forEach(([key, value]) => {
                 const paramItem = document.createElement('div');
@@ -241,17 +252,81 @@ class Utils {
             riskParamsContainer.innerHTML = '';
         }
     }
+    
+    // Apply default configuration
+    static applyDefaultConfig(strategies, config, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container || !config) {
+            Utils.showError('Invalid container or configuration');
+            return;
+        }
 
-    static setupStrategyChangeListener() {
-        const strategySelect = document.getElementById('strategy');
-        if (!strategySelect) return;
-        
-        // Add new event listener
-        strategySelect.addEventListener('change', (event) => {
-            this.populateStrategyParams(event.target.value);
-        });
+        const timeframeSelect = container.querySelector('#timeframe');   
+        const strategySelect = container.querySelector('#strategy');
+        const initialCapitalInput = container.querySelector('#initial-capital');
+        const commissionInput = container.querySelector('#commission');
+        const startDate = container.querySelector('#start-date');
+        const endDate = container.querySelector('#end-date');
+
+        if (timeframeSelect && config.timeframe) {
+            timeframeSelect.value = config.timeframe;
+        }
+        if (strategySelect && config.strategy_name) {
+            strategySelect.value = config.strategy_name;
+            const strategy = strategies.find(s => s.name === config.strategy_name);
+            window.Utils.showInfo(`Default strategy applied: ${config.strategy_name}`);
+            window.Utils.populateStrategyParams(strategy, containerId);
+        }
+        if (initialCapitalInput && config.initial_capital) {
+            initialCapitalInput.value = config.initial_capital;
+        }
+        if (commissionInput && config.commission_rate) {
+            commissionInput.value = config.commission_rate * 100; // Convert to percentage
+        }
+        if (startDate && endDate && config.days) {
+            const start = new Date();
+            start.setDate(start.getDate() - config.days);
+            const end = new Date();
+            const startValue = start.toISOString().split('T')[0];
+            const endValue = end.toISOString().split('T')[0];
+            window.Utils.showSuccess(`Default dates applied: ${startValue} → ${endValue}`);
+            startDate.value = startValue;
+            endDate.value = endValue;
+        }
     }
 
+    static getStrategyParams(strategies, strategy_name, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) {
+            window.Utils.showError('Invalid container with ID: ' + containerId);
+            return {};
+        }
+
+        const strategy = strategies.find(s => s.name === strategy_name);
+        if (!strategy || !strategy.parameters) {
+            console.warn('⚠️ No strategy or parameters found for:', strategy_name);
+            return {};
+        } else {
+            console.log('Strategy found:', strategy);
+        }
+
+        const params = {};
+        // Get parameter values
+        console.log('strategy parameters:', strategy.parameters);
+        console.log('risk parameters:', strategy.risk_parameters);
+        
+        Object.entries(strategy.parameters).forEach(([key, param]) => {
+            const value = container.querySelector(`#${key}`).value;
+            params[key] = parseFloat(value) || param.default; // Use default if input is invalid
+        });
+        // Get risk parameters
+        Object.entries(strategy.risk_parameters || {}).forEach(([key, param]) => {
+            const value = container.querySelector(`#${key}`).value;
+            params[key] = parseFloat(value) || param.default; // Use default if input is invalid
+        });
+
+        return params;
+    }
 }
 
 window.Utils = Utils;

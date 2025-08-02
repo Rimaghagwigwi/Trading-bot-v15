@@ -167,37 +167,15 @@
                     <!-- Paramètres de stratégie -->
                     <div class="config-panel" id="strategy-parameters">
                         <h3>Strategy Parameters</h3>
-                        <div class="form-group">
-                            <label for="sma-short">SMA Court</label>
-                            <input type="number" id="sma-short" name="sma-short" placeholder="20" min="1">
-                        </div>
+                        
                     </div>
 
                     <!-- Paramètres de risque -->
                     <div class="config-panel" id="risk-parameters">
                         <h3>Risk Parameters</h3>
-                        <div class="form-group">
-                            <label for="position-size">Taille de position (%)</label>
-                            <input type="number" id="position-size" name="position-size" placeholder="10" step="0.1" min="0" max="100">
-                        </div>
-                        <div class="form-group">
-                            <label for="stop-loss">Stop Loss (%)</label>
-                            <input type="number" id="stop-loss" name="stop-loss" placeholder="2" step="0.1" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label for="take-profit">Take Profit (%)</label>
-                            <input type="number" id="take-profit" name="take-profit" placeholder="4" step="0.1" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label for="max-positions">Max positions simultanées</label>
-                            <input type="number" id="max-positions" name="max-positions" placeholder="5" min="1">
-                        </div>
-                        <div class="form-group">
-                            <label for="risk-reward">Risk/Reward Ratio</label>
-                            <input type="number" id="risk-reward" name="risk-reward" placeholder="2" step="0.1" min="0">
-                        </div>
                     </div>
-
+                    
+                    <!-- Boutons de contrôle -->
                     <div class="form-group">
                         <button type="button" class="btn btn-success" id="run-backtest">Lancer le Backtest</button>
                         <button type="button" class="btn btn-secondary" id="run-mock-backtest">Test avec données simulées</button>
@@ -238,6 +216,8 @@
             </div>
         </main>
     </div>
+
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 
     <script src="js/api.js"></script>
     <script src="js/utils.js"></script>

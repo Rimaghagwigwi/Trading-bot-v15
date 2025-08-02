@@ -4,11 +4,12 @@ Buy and Hold Strategy
 
 import pandas as pd
 import logging
+from .strategy import Strategy
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class DCA_strategy():
+class DCA_strategy(Strategy):
     """DCA Strategy: Dollar Cost Averaging - Invest a fixed portion regularly"""
     
     parameters = [
@@ -18,12 +19,6 @@ class DCA_strategy():
 
     def __init__(self):
         self.name = 'DCA_strategy'
-        
-    def set_params(self, params):
-        use_defaults = not all(k['name'] in params for k in self.parameters)
-        if use_defaults:
-            logger.info("Using default parameters for DCA strategy")
-        self.params = {p['name']: p['default'] for p in self.parameters} if use_defaults else params
         
     def generate_signals(self, market_data: pd.DataFrame) -> pd.DataFrame:
         print(market_data)
@@ -51,3 +46,22 @@ class DCA_strategy():
         
         # Filter non-null signals
         return signal_df[signal_df['signal'].notnull()]
+
+    def get_strategy_info(self):
+        """
+        Returns strategy information
+        
+        Returns:
+            Dictionary with strategy info
+        """
+        return {
+            'name': self.name,
+            'description': 'Dollar Cost Averaging Strategy - Invest a fixed amount daily and monthly',
+            'recommended_timeframes': ['1d'],
+            'recommended_assets': ['BTC', 'ETH', 'XRP', 'DOGE', 'BNB'],
+            'key_features': [
+                'Invests a fixed amount daily and monthly',
+                'Reduces impact of volatility through regular purchases',
+                'Simple and effective for long-term investors'
+            ]
+        }

@@ -7,6 +7,7 @@ on 30m, 1h, 4h timeframes
 import pandas as pd
 import numpy as np
 import logging
+from .strategy import Strategy
 
 # Import technical indicators from our helpers
 from backend.utils.helpers import calculate_rsi, calculate_ema, calculate_sma, calculate_atr, calculate_macd
@@ -14,7 +15,7 @@ from backend.utils.helpers import calculate_rsi, calculate_ema, calculate_sma, c
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class EMACrossoverRSIVolumeStrategy():
+class EMACrossoverRSIVolumeStrategy(Strategy):
     """
     Strategy combining EMA Crossover, RSI, and Volume analysis
     - Buy signal: Fast EMA > Slow EMA + RSI < 60 + High Volume
@@ -47,12 +48,6 @@ class EMACrossoverRSIVolumeStrategy():
 
     def __init__(self):
         self.name = 'ema_crossover_rsi_volume_strategy'
-
-    def set_params(self, params):
-        use_defaults = not all(k['name'] in params for k in self.parameters)
-        if use_defaults:
-            logger.info("Using default parameters for EMA+RSI+Volume strategy")
-        self.params = {p['name']: p['default'] for p in self.parameters} if use_defaults else params
 
     def generate_signals(self, market_data: pd.DataFrame) -> pd.DataFrame:
         """

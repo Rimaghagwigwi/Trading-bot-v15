@@ -49,6 +49,8 @@
     "initial_capital": 10000,
     "commission_rate": 0.001,
     "timeframe": "1h",
-    "pairs": ["BTCUSDC", "ETHUSDC"]
+    "pairs": ["BTCUSDC", "ETHUSDC"],
+    "strategy_name": "buy_and_hold",
+    "days": 90
   }
 }

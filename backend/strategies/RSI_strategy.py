@@ -5,6 +5,7 @@ RSI (Relative Strength Index) Strategy
 import pandas as pd
 import numpy as np
 import logging
+from .strategy import Strategy
 
 # Import technical indicators from our helpers
 from backend.utils.helpers import calculate_rsi
@@ -12,7 +13,7 @@ from backend.utils.helpers import calculate_rsi
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class RSIStrategy():
+class RSIStrategy(Strategy):
     """RSI Strategy - Buy on oversold, sell on overbought"""
     
     parameters = [
@@ -30,12 +31,6 @@ class RSIStrategy():
 
     def __init__(self):
         self.name = 'rsi_strategy'
-        
-    def set_params(self, params):
-        use_defaults = not all(k['name'] in params for k in self.parameters)
-        if use_defaults:
-            logger.info("Using default parameters for RSI strategy")
-        self.params = {p['name']: p['default'] for p in self.parameters} if use_defaults else params
 
     def generate_signals(self, market_data: pd.DataFrame) -> pd.DataFrame:
         """
@@ -89,3 +84,22 @@ class RSIStrategy():
         logger.info(f"Total number of signals generated: {len(signals_only)}")
         
         return signals_only
+    
+    def get_strategy_info(self):
+        """
+        Returns strategy information
+        
+        Returns:
+            Dictionary with strategy info
+        """
+        return {
+            'name': self.name,
+            'description': 'RSI Strategy - Buy on oversold, sell on overbought',
+            'recommended_timeframes': ['1h', '4h', '1d'],
+            'recommended_assets': ['BTC', 'ETH', 'XRP', 'DOGE', 'BNB'],
+            'key_features': [
+                'Uses RSI to identify overbought/oversold conditions',
+                'Simple yet effective for trending markets',
+                'Can be combined with other strategies for better results'
+            ]
+        }
